@@ -1,0 +1,1 @@
+# lishogi-db-scripts
