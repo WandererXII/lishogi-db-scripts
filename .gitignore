@@ -1,0 +1,4 @@
+node_modules
+.bsp
+target
+application.conf
