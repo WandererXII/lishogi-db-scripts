@@ -29,7 +29,7 @@ object Main extends App {
   }
 
     val fromStr = args.lift(0).getOrElse("2010-07-25")
-    val concurrency = args.lift(1).fold(4)(java.lang.Integer.parseInt)
+    val concurrency = args.lift(1).fold(8)(java.lang.Integer.parseInt)
     val maxDocs = Int.MaxValue
 
     val from = new DateTime(fromStr).withTimeAtStartOfDay()
@@ -64,7 +64,7 @@ object Main extends App {
         val gameSource = coll
           .find(query, Some(projection))
           .sort(BSONDocument("ca" -> 1))
-          .cursor[BSONDocument](readPreference = ReadPreference.secondaryPreferred)
+          .cursor[BSONDocument]()
           .documentSource(maxDocs = maxDocs)
 
         def readDoc(doc: BSONDocument): Encoded = Encoded(
@@ -89,20 +89,6 @@ object Main extends App {
             val usis = shogi.format.usi.Usi.readList(usisStr).get
 
             val bb = shogi.format.usi.Binary.encodeMoves(usis, newVariant)
-
-            // checking remove later
-            val backUsis = shogi.format.usi.Binary.decodeMoves(bb.toList, newVariant)
-            if (usis != backUsis) {
-              println("Possible error: " + g.id)
-              println(oldVariant.key + " -> " + newVariant.key)
-              println(g.binMoves)
-              println(pgnMoves)
-              println(usisStr)
-              println(usis)
-              println(backUsis)
-              println("\n\n")
-            }
-            // END
             
             g.update(BSONBinary(bb, Subtype.GenericBinarySubtype))
           }
@@ -135,7 +121,7 @@ object Main extends App {
           .via(Reporter)
           .mapAsyncUnordered(concurrency)(convert)
           .buffer(300 min maxDocs, OverflowStrategy.backpressure)
-          .mapAsyncUnordered(concurrency * 2)(g => update(g))
+          .mapAsyncUnordered(concurrency * 2)(update)
           .runWith(Sink.ignore) andThen {
             case state =>
               close()

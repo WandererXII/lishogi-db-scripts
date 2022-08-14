@@ -44,7 +44,7 @@ coll.find({}).forEach((f) => {
     const cur_step = f.steps[i];
     for (let j in cur_step) {
       f.steps[i][j].usi = assureUsi(f.steps[i][j].uci || f.steps[i][j].usi);
-      f.steps[i][j].sfen = fixSfen(f.steps[i][j].fen || f.steps[i][j].sfen, f.steps[i][j].ply); // todo
+      f.steps[i][j].sfen = fixSfen(f.steps[i][j].fen || f.steps[i][j].sfen, f.steps[i][j].ply);
 
       delete f.steps[i][j].san;
       delete f.steps[i][j].uci;

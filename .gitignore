@@ -1,4 +1,3 @@
-node_modules
-.bsp
-target
+.bsp/
+target/
 application.conf
