@@ -8,7 +8,7 @@ print("Dropping eval cache");
 db.eval_cache.drop();
 
 print("Updating fishnet client");
-db.fishnet_client.updateMany({}, { $unset: { instance: 1, evaluation: 1 } });
+db.fishnet_client.updateMany({}, { $unset: ["instance", "evaluation"] });
 
 print("Updating study_chapter setup fen -> sfen");
 db.study_chapter.updateMany(
@@ -40,4 +40,15 @@ print("Remove old pgn saved notation");
 db.game5.updateMany(
   { "pgni.pgn": { $exists: true } },
   { $unset: { pgni: true } }
+);
+
+print("Update variant in seeks");
+db.seek.updateMany({ variant: 3 }, { $set: { variant: NumberInt(1) } });
+db.seek_archive.updateMany({ variant: 3 }, { $set: { variant: NumberInt(1) } });
+
+print("fishnet_analysis: " + db.fishnet_analysis.find().count());
+db.fishnet_analysis.drop();
+db.fishnet_analysis.createIndex(
+  { createdAt: 1 },
+  { expireAfterSeconds: 1209600, background: true }
 );
